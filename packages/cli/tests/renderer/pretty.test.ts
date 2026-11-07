@@ -92,6 +92,22 @@ describe("renderPretty", () => {
     expect(line).not.toContain("✗")
     expect(line).toContain("not checked")
   })
+
+  it("stack rows stay aligned with a long IPv6 address", () => {
+    const t: any = successTrace()
+    t.requests[0].attempts.v6.network_peer_address = "2400:52e0:1e00:2::1332:1"
+    const rows = render(t)
+      .split("\n")
+      .filter((l) => /^\s+v[46]: /.test(l))
+    expect(rows).toHaveLength(2)
+    expect(rows[0]!.indexOf(" h2 ")).toBe(rows[1]!.indexOf(" h2 "))
+  })
+
+  it("a short issuer CN is shown with its organisation", () => {
+    const t: any = successTrace()
+    t.requests[0].attempts.v4.tls.data.cert_leaf.issuer = "C=US O=Let's Encrypt CN=YE2"
+    expect(render(t)).toContain("cert Let's Encrypt YE2")
+  })
 })
 
 describe("renderPretty --verbose", () => {

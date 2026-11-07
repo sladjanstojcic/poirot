@@ -152,4 +152,43 @@ describe("orchestrator.probe()", () => {
     },
     15000,
   )
+
+  it(
+    "subresource audit sees the page body",
+    async () => {
+      server = http
+        .createServer((_req, res) => {
+          res.writeHead(200, { "content-type": "text/html" })
+          res.end('<html><head><script src="https://cdn.example/app.js"></script><link rel="stylesheet" href="/site.css"></head><body><img src="/logo.png"></body></html>')
+        })
+        .listen(0, "127.0.0.1")
+      await new Promise<void>((resolve) => server?.once("listening", () => resolve()))
+      const port = (server.address() as any).port
+      const t = await probe(`http://127.0.0.1:${port}/`, { timeout: 5000 })
+      const sub = t.requests[0]!.audits.subresources.data!
+      expect(sub.resources.map((r) => r.tag).sort()).toEqual(["img", "link", "script"])
+      expect(sub.counts_by_type.script).toBe(1)
+      expect(JSON.stringify(t)).not.toContain("rawBody")
+    },
+    15000,
+  )
+
+  it(
+    "default User-Agent sent on the wire matches the trace",
+    async () => {
+      let sent = ""
+      server = http
+        .createServer((req, res) => {
+          if (req.url === "/") sent = String(req.headers["user-agent"])
+          res.writeHead(200).end("ok")
+        })
+        .listen(0, "127.0.0.1")
+      await new Promise<void>((resolve) => server?.once("listening", () => resolve()))
+      const port = (server.address() as any).port
+      const t = await probe(`http://127.0.0.1:${port}/`, { timeout: 5000 })
+      expect(sent).toBe(t.input.userAgent)
+      expect(sent).toMatch(/^poirot\/0\.1\.1 /)
+    },
+    15000,
+  )
 })

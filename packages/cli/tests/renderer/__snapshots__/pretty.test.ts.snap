@@ -16,13 +16,13 @@ exports[`renderPretty > matches snapshot 1`] = `
     ├─ dns      3ms   via system  1.2.3.4 (v4)
     ├─ tcp     11ms   1.2.3.4:443
     ├─ tls     44ms   TLS 1.3  TLS_AES_256_GCM_SHA384  ALPN h2
-    │                 cert R11
+    │                 cert Let's Encrypt R11
     │                 expires 2030-03-17 (75d)  fp sha256 1AF6:27C6:…:EFFB
     └─ http   106ms   h2  1.2 KB  gzip  text/html  server: nginx
 
     Stacks
-      v4: 164ms  1.2.3.4              h2   200
-      v6: 164ms  2001:db8::1          h2   200
+      v4: 164ms  1.2.3.4     h2   200
+      v6: 164ms  2001:db8::1 h2   200
       ✓ dual-stack consistent
 
     Audits

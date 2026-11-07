@@ -18,7 +18,7 @@ Give Poirot a URL and it walks every step of the request — DNS, TCP, TLS, HTTP
 Debugging a misbehaving site usually means stitching together `dig`, `curl -v`, `openssl s_client` and a few web checkers. Poirot runs those steps for you, over IPv4 and IPv6, and reports where the request went, how long each step took, and what is wrong — as a terminal report or as JSON for your pipelines.
 
 ```text
-◆ poirot v0.1.0  ·  example.com → https://example.com/
+◆ poirot v0.1.1  ·  example.com → https://example.com/
 ────────────────────────────────────────────────────────────
 
   Domain
@@ -29,23 +29,23 @@ Debugging a misbehaving site usually means stitching together `dig`, `curl -v`, 
     Email stack    not checked (domain does not send or receive mail)
                    MX: null (RFC 7505) — domain rejects mail
 
-  Request 1    GET https://example.com/    200 OK    542ms
-    ├─ dns      4ms   via system  104.20.23.154 (v4)
+  Request 1    GET https://example.com/    200 OK    557ms
+    ├─ dns     19ms   via system  104.20.23.154 (v4)
     ├─ tcp     11ms   104.20.23.154:443
-    ├─ tls    427ms   TLS 1.3  TLS_AES_256_GCM_SHA384  ALPN h2
+    ├─ tls    426ms   TLS 1.3  TLS_AES_256_GCM_SHA384  ALPN h2
     │                 cert Cloudflare TLS Issuing ECC CA 3
     │                 expires 2026-12-25 (48d)  fp sha256 85CA:6AB0:…:F07A
-    └─ http    54ms   h2  577 B  text/html  server: cloudflare
+    └─ http    53ms   h2  577 B  text/html  server: cloudflare
 
     Stacks
-      v4: 93ms   104.20.23.154        h2   200
+      v4: 116ms  104.20.23.154           h2   200
       v6: fail   TCP_UNREACHABLE
       – only v4 answered (v6 failure is informational)
 
     Audits
       Headers        HSTS ✗  CSP ✗  X-Frame ⚠  XCTO ⚠  (5 more)
       Cookies        (none set)
-      Subresources   none · 0 mixed-content · 0 without SRI
+      Subresources   1 script, 1 link · 0 mixed-content · 0 without SRI
       Hosting        AS13335 CLOUDFLARENET - Cloudflare, Inc., US · CDN Cloudflare
       security.txt   ✗ not present
       HTTP/3         advertised (Alt-Svc)
@@ -57,7 +57,7 @@ Debugging a misbehaving site usually means stitching together `dig`, `curl -v`, 
     ⚠  CLICKJACKING_NOT_PREVENTED      No X-Frame-Options and no CSP frame-ancestors
     ⚠  X_CONTENT_TYPE_OPTIONS_MISSING  Missing X-Content-Type-Options: nosniff
 
-  Total 553 ms · schemaVersion 1.0 · algorithm v2
+  Total 567 ms · schemaVersion 1.0 · algorithm v2
 ```
 
 ## Contents

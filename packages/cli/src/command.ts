@@ -14,7 +14,7 @@ const parseIntOr =
     return Number.isFinite(parsed) ? parsed : fallback
   }
 
-/** "0.1.0 (node v24.19.0)" or "0.1.0 (bun 1.3.9)" — spec 05 §3.4. */
+/** "<version> (node v24.19.0)" or "<version> (bun 1.3.9)" — spec 05 §3.4. */
 function versionString(): string {
   const bun = (globalThis as any).Bun?.version as string | undefined
   return `${(packageJson as any).version} (${bun ? `bun ${bun}` : `node ${process.version}`})`

@@ -3,6 +3,15 @@
 All notable changes to Poirot will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-11-07
+
+### Fixed
+- Subresource, mixed-content and SRI audits never received the page body and always reported no subresources.
+- The first request's audits no longer wait for the domain checks (RDAP, DNS records, email); a site with slow DNS and a redirect could run out the default timeout and be reported as unreachable.
+- The raw response body no longer appears in the JSON trace.
+- The User-Agent sent by default now matches the running version (it was always `poirot/0.1.0`).
+- Pretty output: IPv4/IPv6 rows stay aligned with long IPv6 addresses; short issuer names show their organisation (`Let's Encrypt YE2`).
+
 ## [0.1.0] - 2026-11-07
 
 Initial public release.

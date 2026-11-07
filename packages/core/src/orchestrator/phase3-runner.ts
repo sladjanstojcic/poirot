@@ -23,7 +23,8 @@ export interface Phase3Input {
   response?: HttpResponse
   rawBody: Buffer
   peerIp: string
-  dnsHttpsRecords?: HttpsSvcbRecord[]
+  /** HTTPS/SVCB records from phase 1. A promise, so only the HTTP/3 check waits for phase 1. */
+  dnsHttpsRecords?: Promise<HttpsSvcbRecord[] | undefined>
 }
 
 export interface Phase3Audits {
@@ -74,7 +75,9 @@ export async function runPhase3(input: Phase3Input, ctx: ProbeCtx): Promise<Phas
       ),
       hostingFp({ ip: input.peerIp, headers }, ctx),
       securityTxt({ origin: input.origin }, ctx),
-      http3Discovery({ headers, dns_https: input.dnsHttpsRecords }, ctx),
+      input.dnsHttpsRecords
+        ? input.dnsHttpsRecords.then((dns_https) => http3Discovery({ headers, dns_https }, ctx))
+        : http3Discovery({ headers }, ctx),
     ])
 
   return {

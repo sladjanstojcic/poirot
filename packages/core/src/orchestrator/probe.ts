@@ -5,7 +5,7 @@ import dkimSelectors from "../data/dkim-selectors.json" with { type: "json" }
 import { toALabel } from "../net/idn.js"
 import { DEADLINE_REASON, type ProbeCtx, type ProbeEvent } from "../probe.js"
 import type { DomainContext, ProbeResult, RequestTrace, Trace } from "../types/index.js"
-import { AUDIT_ALGORITHM_VERSION, SCHEMA_VERSION } from "../version.js"
+import { AUDIT_ALGORITHM_VERSION, DEFAULT_USER_AGENT, SCHEMA_VERSION } from "../version.js"
 import packageJson from "../../package.json" with { type: "json" }
 import { detectRedirectLoop, nextHopUrl } from "./redirect-follow.js"
 import { dualStack } from "./dual-stack.js"
@@ -24,7 +24,6 @@ export interface ProbeOptions {
   onEvent?: (event: ProbeEvent) => void
 }
 
-const DEFAULT_UA = `poirot/${(packageJson as any).version} (+https://github.com/sladjanstojcic/poirot)`
 
 function normalizeInputUrl(raw: string): string {
   const trimmed = raw.trim()
@@ -72,6 +71,13 @@ async function maybeRunPhase1(domain: string, ctx: ProbeCtx, opts: ProbeOptions)
     },
     ctx,
   )
+}
+
+/** Response bytes are for the audits only; they never go into the JSON trace. */
+function withoutBody<T extends object>(attempt: T | undefined): T | undefined {
+  if (!attempt || !("rawBody" in attempt)) return attempt
+  const { rawBody: _rawBody, ...rest } = attempt as T & { rawBody: unknown }
+  return rest as T
 }
 
 export async function probe(inputUrl: string, opts: ProbeOptions = {}): Promise<Trace> {
@@ -134,7 +140,7 @@ export async function probe(inputUrl: string, opts: ProbeOptions = {}): Promise<
         response,
         rawBody,
         peerIp: peerIp ?? "",
-        dnsHttpsRecords: (await phase1).dns.data?.https,
+        dnsHttpsRecords: phase1.then((domainCtx) => domainCtx.dns.data?.https),
       },
       ctx,
     )
@@ -142,7 +148,7 @@ export async function probe(inputUrl: string, opts: ProbeOptions = {}): Promise<
     const nextUrl: string | null = response ? nextHopUrl(current, response.status, response.headers) : null
     requests.push({
       url: current,
-      attempts: { v4, v6 },
+      attempts: { v4: withoutBody(v4), v6: withoutBody(v6) },
       primaryStack: primary,
       response,
       audits,
@@ -161,7 +167,7 @@ export async function probe(inputUrl: string, opts: ProbeOptions = {}): Promise<
     schemaVersion: SCHEMA_VERSION,
     traceStartedAt,
     duration_ms: 0,
-    input: { raw: inputUrl, url, userAgent: opts.userAgent ?? DEFAULT_UA, flags: { ...opts } },
+    input: { raw: inputUrl, url, userAgent: opts.userAgent ?? DEFAULT_USER_AGENT, flags: { ...opts } },
     runner: {
       name: "poirot",
       version: (packageJson as any).version,

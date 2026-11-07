@@ -1,4 +1,5 @@
 import { performance } from "node:perf_hooks"
+import { DEFAULT_USER_AGENT } from "../version.js"
 import { runStack } from "./run-stack.js"
 import type { NetworkAttempt } from "../types/index.js"
 
@@ -19,7 +20,7 @@ export async function dualStack(args: {
     cache: new Map(),
     logger: () => {},
   }
-  const userAgent = args.opts.userAgent ?? "poirot/0.1.0 (+https://github.com/sladjanstojcic/poirot)"
+  const userAgent = args.opts.userAgent ?? DEFAULT_USER_AGENT
   const common = {
     hostname: u.hostname,
     path,

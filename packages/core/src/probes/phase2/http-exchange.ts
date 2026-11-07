@@ -31,6 +31,13 @@ function buildCurl(url: URL, method: string, ua: string, allowH2: boolean, pin_i
   return parts.join(" ")
 }
 
+/**
+ * Response bodies keyed by the probe's `data` object. Kept out of `data` itself so
+ * the bytes never enter the JSON trace; the orchestrator hands them to the
+ * HTML-based audits (subresources, mixed content, SRI).
+ */
+export const responseBodies = new WeakMap<object, Buffer>()
+
 // buildConnector returns the low-level dialer. We wrap it to override the dial target host.
 const baseConnector = buildConnector({ rejectUnauthorized: false })
 
@@ -134,23 +141,26 @@ export const httpExchange = defineProbe<HttpExchangeInput, HttpExchange>(
     const protocol: HttpExchange["protocol"] = input.allowH2 ? "h2" : "http/1.1"
     const body = Buffer.concat(chunks)
 
+    const data: HttpExchange = {
+      protocol,
+      status: res.statusCode,
+      headers,
+      body: {
+        bytes_received: received,
+        truncated_at: truncated ? cap : undefined,
+        content_type: res.headers["content-type"] as string | undefined,
+        encoding: res.headers["content-encoding"] as string | undefined,
+        sha256: crypto.createHash("sha256").update(body).digest("hex"),
+      },
+      ttfb_ms,
+      total_ms,
+      curl_command: buildCurl(url, input.method, input.user_agent, input.allowH2, input.pin_ip),
+    }
+    responseBodies.set(data, body)
+
     return {
       status: issues.some((issue) => issue.code === ISSUE.HTTP_TIMEOUT) ? "warn" : "pass",
-      data: {
-        protocol,
-        status: res.statusCode,
-        headers,
-        body: {
-          bytes_received: received,
-          truncated_at: truncated ? cap : undefined,
-          content_type: res.headers["content-type"] as string | undefined,
-          encoding: res.headers["content-encoding"] as string | undefined,
-          sha256: crypto.createHash("sha256").update(body).digest("hex"),
-        },
-        ttfb_ms,
-        total_ms,
-        curl_command: buildCurl(url, input.method, input.user_agent, input.allowH2, input.pin_ip),
-      },
+      data,
       issues,
     }
   },

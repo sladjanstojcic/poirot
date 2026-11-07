@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import { runCli, startServer } from "./helpers/run-cli.js"
 
@@ -35,7 +36,8 @@ describe("CLI meta flags and env defaults", () => {
 
   it("--version includes runtime", async () => {
     const r = await runCli(["--version"])
-    expect(r.stdout.trim()).toMatch(/^0\.1\.0 \((node|bun) v?\d/)
+    const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
+    expect(r.stdout.trim()).toMatch(new RegExp(`^${version.replace(/\./g, "\\.")} \\((node|bun) v?\\d`))
   }, 20_000)
 
   it("--help shows defaults", async () => {

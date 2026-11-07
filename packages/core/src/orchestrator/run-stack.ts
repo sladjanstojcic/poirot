@@ -1,5 +1,5 @@
 import { dnsResolve } from "../probes/phase2/dns-resolve.js"
-import { httpExchange } from "../probes/phase2/http-exchange.js"
+import { httpExchange, responseBodies } from "../probes/phase2/http-exchange.js"
 import { tcpConnect } from "../probes/phase2/tcp-connect.js"
 import { tlsHandshake } from "../probes/phase2/tls-handshake.js"
 import type { ProbeCtx } from "../probe.js"
@@ -133,6 +133,6 @@ export async function runStack(args: {
     tls,
     http,
     curl_command: http.data?.curl_command ?? "",
-    rawBody: Buffer.alloc(0),
+    rawBody: (http.data && responseBodies.get(http.data)) ?? Buffer.alloc(0),
   } as any
 }

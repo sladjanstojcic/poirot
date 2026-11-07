@@ -88,9 +88,15 @@ function bytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`
 }
 
-/** "CN=Foo CA 1" from an issuer DN; falls back to O=, then the raw string. */
+/**
+ * Issuer for display: the CN ("Cloudflare TLS Issuing ECC CA 3"), prefixed with
+ * the organisation when the CN alone is a bare code ("YE2" → "Let's Encrypt YE2").
+ */
 function issuerName(dn: string): string {
-  return /CN=([^,\n]+?)(?=\s+[A-Z]{1,2}=|$)/.exec(dn)?.[1] ?? /O=([^,\n]+?)(?=\s+[A-Z]{1,2}=|$)/.exec(dn)?.[1] ?? dn
+  const cn = /CN=([^,\n]+?)(?=\s+[A-Z]{1,2}=|$)/.exec(dn)?.[1]
+  const org = /O=([^,\n]+?)(?=\s+[A-Z]{1,2}=|$)/.exec(dn)?.[1]
+  if (cn && org && cn.length <= 6) return `${org} ${cn}`
+  return cn ?? org ?? dn
 }
 
 /** "1AF6:27C6:…:EFFB" from a colon-separated SHA-256 fingerprint. */
@@ -208,7 +214,7 @@ function tree(attempt: NetworkAttempt, verbose: boolean): string[] {
   return lines
 }
 
-function attemptSummary(attempt: NetworkAttempt): string {
+function attemptSummary(attempt: NetworkAttempt, addressWidth: number): string {
   const http = attempt.http.data
   const label = `${attempt.stack}:`
   if (!http) {
@@ -216,13 +222,14 @@ function attemptSummary(attempt: NetworkAttempt): string {
     return `      ${label} ${pc.yellow("fail")}   ${failed?.issues[0]?.code ?? "no response"}`
   }
   const total = (attempt.timings.dns ?? 0) + (attempt.timings.connect ?? 0) + (attempt.timings.ssl ?? 0) + (attempt.timings.wait ?? 0) + (attempt.timings.receive ?? 0)
-  return `      ${label} ${ms(total).padEnd(6)} ${pc.cyan(attempt.network_peer_address.padEnd(20))} ${http.protocol.padEnd(4)} ${http.status}`
+  return `      ${label} ${ms(total).padEnd(6)} ${pc.cyan(attempt.network_peer_address.padEnd(addressWidth))} ${http.protocol.padEnd(4)} ${http.status}`
 }
 
 function dualStackLines(request: RequestTrace): string[] {
   const { v4, v6 } = request.attempts
   if (!v4 || !v6 || (!v4.http.data && !v6.http.data)) return []
-  const lines = ["", `    ${pc.bold("Stacks")}`, attemptSummary(v4), attemptSummary(v6)]
+  const width = Math.max(v4.network_peer_address.length, v6.network_peer_address.length)
+  const lines = ["", `    ${pc.bold("Stacks")}`, attemptSummary(v4, width), attemptSummary(v6, width)]
   const bothOk = v4.http.data && v6.http.data
   const sameCert = !v4.tls.data || !v6.tls.data || v4.tls.data.cert_leaf.fingerprint_sha256 === v6.tls.data.cert_leaf.fingerprint_sha256
   const failed = !v4.http.data ? v4 : !v6.http.data ? v6 : undefined
