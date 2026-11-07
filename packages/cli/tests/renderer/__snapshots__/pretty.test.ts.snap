@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderPretty > matches snapshot 1`] = `
+"◆ poirot v0.1.0  ·  ex.test → https://ex.test/
+────────────────────────────────────────────────────────────
+
+  Domain
+    Registrar      Example Registrar (created 1995-05-09, age 31y)
+    Expires        2030-01-01  ✓ 800d left
+    DNSSEC         not signed
+    Nameservers    ns1.ex.test, ns2.ex.test
+    Email stack    not checked (domain does not send or receive mail)
+                   MX: null (RFC 7505) — domain rejects mail
+
+  Request 1    GET https://ex.test/    200 OK    162ms
+    ├─ dns      3ms   via system  1.2.3.4 (v4)
+    ├─ tcp     11ms   1.2.3.4:443
+    ├─ tls     44ms   TLS 1.3  TLS_AES_256_GCM_SHA384  ALPN h2
+    │                 cert R11
+    │                 expires 2030-03-17 (75d)  fp sha256 1AF6:27C6:…:EFFB
+    └─ http   106ms   h2  1.2 KB  gzip  text/html  server: nginx
+
+    Stacks
+      v4: 164ms  1.2.3.4              h2   200
+      v6: 164ms  2001:db8::1          h2   200
+      ✓ dual-stack consistent
+
+    Audits
+      Headers        HSTS ✓  CSP ✗  X-Frame ✓  XCTO ✓  (3 more)
+      Cookies        (none set)
+      Subresources   3 script, 1 link · 0 mixed-content · 0 without SRI
+      Hosting        AS13335 CLOUDFLARENET · CDN Cloudflare
+      security.txt   ✗ not present
+      HTTP/3         advertised (Alt-Svc)
+
+  Verdict  warn  ·  Grade  B  (85/100)  ·  5 issues
+    ⚠  CSP_MISSING      No Content-Security-Policy header
+    ⚠  MTA_STS_MISSING  No MTA-STS policy
+    ⚠  SPF_MISSING      No SPF record
+    ⚠  DMARC_MISSING    No DMARC record
+    ⚠  COOP_MISSING     No Cross-Origin-Opener-Policy header
+
+  Total 162 ms · schemaVersion 1.0 · algorithm v2"
+`;

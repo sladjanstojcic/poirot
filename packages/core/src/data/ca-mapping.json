@@ -1,0 +1,13 @@
+{
+  "letsencrypt.org": ["lets encrypt", "isrg", "internet security research group"],
+  "pki.goog": ["google trust services", "gts"],
+  "digicert.com": ["digicert", "digicert inc", "digicert global", "cybertrust"],
+  "sectigo.com": ["sectigo", "comodo", "comodo ca", "usertrust"],
+  "globalsign.com": ["globalsign"],
+  "ssl.com": ["ssl com", "ssl corp"],
+  "comodoca.com": ["comodo", "sectigo"],
+  "buypass.com": ["buypass"],
+  "certainly.com": ["certainly"],
+  "entrust.net": ["entrust"],
+  "identrust.com": ["identrust"]
+}

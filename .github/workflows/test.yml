@@ -1,0 +1,38 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    # Same OS set as the release builds, so platform problems show up before tagging.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      # Bun is needed by packages/cli/tests/compiled-binary.test.ts, which builds
+      # and runs the release binary (same Bun version as release.yml).
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.9"
+      # pnpm version comes from package.json "packageManager" (action fails if both are set)
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      # env: instead of the script's inline VAR=1 syntax, which Windows cmd cannot run
+      - run: pnpm --filter @poirot/core exec vitest run tests/perf/
+        env:
+          POIROT_PERF: "1"

@@ -1,0 +1,28 @@
+{
+  "name": "poirot-sh",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "pnpm -r test",
+    "test:watch": "pnpm --filter @poirot/core test -- --watch",
+    "test:live": "POIROT_LIVE=1 pnpm --filter @poirot/core test -- live/",
+    "test:coverage": "pnpm --filter @poirot/core test -- --coverage",
+    "typecheck": "pnpm -r typecheck",
+    "dev": "tsx packages/cli/src/bin.ts",
+    "refresh:ip-ranges": "tsx scripts/fetch-ip-ranges.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "tsx": "^4.21.0",
+    "vitest": "^4.1.4",
+    "@types/node": "^22.14.0",
+    "@vitest/coverage-v8": "^4.1.4"
+  },
+  "volta": {
+    "node": "24.19.0"
+  }
+}

@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.DS_Store
+.env
+.env.local
+*.log
+coverage/
+.turbo/
+.vitest-cache/
+pnpm-debug.log
+# Build outputs
+poirot-linux-*
+poirot-darwin-*
+poirot-windows-*
+*.exe
+
+# Internal design docs, plans and research (kept local)
+docs/
+
+# Local artifacts (PDF report prototype, browser-tool logs)
+demos/
+.playwright-mcp/
